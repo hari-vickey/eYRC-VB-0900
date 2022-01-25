@@ -1,9 +1,0 @@
-site_name: eYRC-VB#0900-Documentation
-nav:
-    - Home: index.md
-    - Introduction: intro.md
-    - Implementation: implement.md
-    - API Documentation: api.md
-    - Contact Us: about.md
-
-use_directory_urls: false
