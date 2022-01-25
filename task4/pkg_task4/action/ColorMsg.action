@@ -1,9 +1,0 @@
-# goal
-string name
-string color
----
-# result
-bool flag_success
----
-# feedback
-int8 percentage_complete
