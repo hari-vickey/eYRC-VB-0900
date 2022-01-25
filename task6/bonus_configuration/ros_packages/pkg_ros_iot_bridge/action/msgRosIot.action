@@ -1,0 +1,16 @@
+# goal
+string dispatch_time
+string shipped_time
+string sheet_name
+string order_id
+string city
+string package_name
+string package_color
+string dispatch_status
+string shipped_status
+---
+# result
+bool flag_success
+---
+# feedback
+int8 percentage_complete

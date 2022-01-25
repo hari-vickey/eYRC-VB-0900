@@ -1,0 +1,25 @@
+<launch>
+
+    <!-- Group ur5_1 to launch the rviz and their respective node -->
+    <group ns="ur5_1">
+        <!-- Launch Moveit move_group Node for ur5_1 -->
+        <include file = "$(find pkg_moveit_ur5_1)/launch/move_group.launch" />
+        <!-- Run RViz with Moveit! Plugin -->
+        <arg name="use_rviz" default="true" />
+        <include file="$(find pkg_moveit_ur5_1)/launch/moveit_rviz.launch" if="$(arg use_rviz)">
+            <arg name="rviz_config" value="$(find pkg_moveit_ur5_1)/launch/moveit_ur5_1.rviz"/>
+        </include>
+    </group>
+
+    <!-- Group ur5_2 to launch the rviz and their respective node -->
+    <group ns="ur5_2">
+        <!-- Launch Moveit move_group Node for ur5_1 -->
+        <include file = "$(find pkg_moveit_ur5_2)/launch/move_group.launch" />
+        <!-- Run RViz with Moveit! Plugin -->
+        <arg name="use_rviz" default="true" />
+        <include file="$(find pkg_moveit_ur5_2)/launch/moveit_rviz.launch" if="$(arg use_rviz)">
+            <arg name="rviz_config" value="$(find pkg_moveit_ur5_2)/launch/moveit_ur5_2.rviz"/>
+        </include>
+    </group>
+
+</launch>

@@ -1,0 +1,13 @@
+# goal
+string name
+string color
+string orderid
+string city
+string time
+int32 simtime
+---
+# result
+bool flag_success
+---
+# feedback
+int8 percentage_complete
