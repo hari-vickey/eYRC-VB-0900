@@ -30,4 +30,4 @@ MoveIt is the most widely used software for manipulation and has been used on ov
 
 We have embedded a youtube video which will demonstrate the complete implementation of this theme. We will also discuss all the implementation techniques and APIs used in this theme in the next section.
 
-<iframe width="1080" height="580" src="https://youtube.com/embed/aRYPRQHPc9E" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="850" height="480" src="https://youtube.com/embed/aRYPRQHPc9E" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>

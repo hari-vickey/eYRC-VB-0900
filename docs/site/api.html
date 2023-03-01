@@ -105,7 +105,7 @@
 
 <h2 id="api-documentation"><strong><em>API Documentation</em></strong></h2>
 <div align="justify">
-<p>In this section, we will discuss about the API's that are used in this theme
+<p>In this section, we will discuss the APIs that are used in this theme
 to complete the objectives mentioned.</p>
 <p>We have used following ROS packages</p>
 <ul>
@@ -115,12 +115,12 @@ to complete the objectives mentioned.</p>
 </ul>
 <h3 id="pkg_ros_iot_bridge"><strong>pkg_ros_iot_bridge</strong></h3>
 <p>This is one of the main packages which is required to complete the objective.
-As this theme is concentrating on development of Automated Warehouse Management System and as we know that an autonomous system needs to do the job on it's own. So, It will receive orders only through IOT i.e., HiveMq and all the status are updated again to the internet medium. So, there is a need of an API which can act as a Bridge between IOT and ROS.</p>
-<p>As this package is a bridge between ROS and IOT, we need to know the working of this package. We have included the tree of the package , we will discuss all the files and their usage on this package.</p>
+As this theme is concentrating on the development of an Automated Warehouse Management System and as we know that an autonomous system needs to do the job on its own. So, It will receive orders only through IOT i.e., HiveMq and all the statuses are updated again to the internet medium. So, an API that can act as a Bridge between IOT and ROS is needed.</p>
+<p>As this package is a bridge between ROS and IOT, we need to know the working of this package. We have included the tree of the package, we will discuss all the files and their usage on this package.</p>
 <p class="aligncenter"><img alt="alt text" src="images/tree_rosiot.png" /></p>
 <h4 id="config-pyiot"><strong>config_pyiot.yaml</strong></h4>
 <p>To make this package act as a bridge there are certain parameters to be loaded to the ROS Master. This config_pyiot.yaml makes the parameter to be published. All the mqtt topics, ros topics and spreadsheet ids are stored in this yaml file. Hence it can be used in the ROS-IOT action server.
-Important ros and mqtt topics are listed below</p>
+Important ros and mqtt topics are listed below.</p>
 <pre><code class="yaml">    # MQtt Topic on which all the orders are sent
     topic_sub: &quot;/eyrc/vb/BiAdKaHa/orders&quot; # Unique ID = BiAdKaHa
     # ROS nodes can listen to this topic to receive data from MQTT

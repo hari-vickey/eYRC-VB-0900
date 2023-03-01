@@ -21,7 +21,7 @@ The explanation for the above image is mentioned below.
 6.  If it detects the package, then it will sort the package from the conveyor to the shipping bins based on its colour.
 7.  Both the ur5 arm nodes will send the data to the ROS-IOT bridge synchronously to push the data into the google sheets.
 8.  In google sheets, we use Dashboard sheet as a JSON endpoint for IOT Dashboard.
-9.  IOT Dashboard shows the status of all the orders in a user-friendly display.
+9.  IoT Dashboard shows the status of all the orders in a user-friendly display.
 
 Now, let us see all the components mentioned in the process flow individually.
 
@@ -61,7 +61,7 @@ On completion of image processing, the image is decoded with the help of pyzbar.
 
 Re-arranging Method - The re-arranging is done twice one with the x position of the decoded data and the y position of the decoded data. Finally, the package name and colour are stored in the list which can be used for further processing.
 
-The Class UR51Node will use the class camera to get the colour and package name in the shelf. Before that, the constructor of this class will interface the ur5 arm present in the gazebo to the moveit planners. Then this node will send the extracted package colour and package name to the ROS-IOT server to push the data into the Inventory Spreadsheet of the google sheets asynchronously.
+The Class UR51Node will use the class camera to get the colour and package name in the shelf. Before that, the constructor of this class will interface the ur5 arm present in the gazebo to the moveit planners. Then this node will send the extracted package colour and package name to the ROS-IOT server to push the data into the Inventory Spreadsheet of the google sheets synchronously.
 
 This node needs to subscribe to the ROS Topic which contains all the data of the incoming order which is published by ROS-IOT Bridge.
 
@@ -93,7 +93,7 @@ Subscription Topic - /eyrc/vb/logical_camera_2
 
 The callback function of this subscriber will continuously monitor the position of the packages when it is in the logical camera's frame. After detecting the package, we need to move our arm from its current position to the top of the package. This will also use the subscription of the logical camera 2 topics. After detecting the values for the translation the values are passed to the end effector translation function which will compute cartesian waypoints to move the arm.
 
-Now, coming back to the sorting function which will use all the above-mentioned supporting functions to complete the manipulation. We have threaded this function to make the belt run parallel while the package is being sorted. The colour of this package received from the client is used for sorting. We have included one more thread to push data asynchronously to the ROS-IOT server.
+Now, coming back to the sorting function which will use all the above-mentioned supporting functions to complete the manipulation. We have threaded this function to make the belt run parallel while the package is being sorted. The colour of this package received from the client is used for sorting. We have included one more thread to push data synchronously to the ROS-IOT server.
 
 After shipping each package from the conveyor to the bins the status of that package is also updated the google sheets by using send goal IoT function to the ROS-IOT server. Also, there are some other functions like hard on_goal, on_cancel, and set joint angles which support the above-mentioned functions to complete their respective jobs.
 

@@ -104,67 +104,67 @@
 <div align="justify">
 <p>The objective of this task is to implement an Autonomous Warehouse Management System to process, sort, dispatch and ship the packages based on incoming customer orders from different cities by taking into consideration the priorities allotted for the packages using two UR5 arms.</p>
 <h4 id="process-flow"><strong>Process Flow</strong></h4>
-<p>The important part of this implementation is the ROS communication. ROS acts as a effective median among all the platforms used in this theme. First let us have a look into the flow chart of our implementation that shows the flow of data in different nodes.</p>
+<p>The important part of this implementation is ROS communication. ROS acts as an effective median between all the platforms that we have used in the theme. First, we will look into the flow chart of our implementation which shows the flow of data in different nodes.</p>
 <p><img alt="alt text" src="images/ROS-Communication.png" /></p>
-<p>The illustration to the above image is explained as under.</p>
+<p>The explanation for the above image is explained as under.</p>
 <ol>
 <li>The first process in this implementation is to get the incoming orders from  HiveMQ using ROS-IOT Bridge.</li>
-<li>The orders received in ROS-IOT Bridge are sent to Ur5_1 arm node.</li>
+<li>The orders that are received in ROS-IOT Bridge are sent to the Ur5_1 arm node.</li>
 <li>The Ur5_1 arm node can prioritize the incoming goals and process the goals further.</li>
-<li>The ur5_1 arm will pick the package from shelf and place it in the conveyor belt, then it will send the goal to Ur5_2 arm node.</li>
-<li>On receiving goals from ur5_1 arm Node, ur5_2 arm Node will look for that package using logical camera.</li>
-<li>If it detect the package, then it will sort the same from conveyor to the shipping bins based on it's color.</li>
-<li>Both the Ur5 arm nodes will send the data to ROS-IOT bridge asynchronously to push the data into the google sheets.</li>
+<li>The ur5_1 arm picks the package from the shelf and places it in the conveyor belt, then it will send the goal to the ur5_2 arm node.</li>
+<li>On receiving goals from the ur5_1 arm, the ur5_2 arm node will look for that package using the logical camera.</li>
+<li>If it detects the package, then it will sort the package from the conveyor to the shipping bins based on its colour.</li>
+<li>Both the ur5 arm nodes will send the data to the ROS-IOT bridge synchronously to push the data into the google sheets.</li>
 <li>In google sheets, we use Dashboard sheet as a JSON endpoint for IOT Dashboard.</li>
-<li>IOT Dashboard is to show the status of all the orders in a user friendly display.</li>
+<li>IoT Dashboard shows the status of all the orders in a user-friendly display.</li>
 </ol>
-<p>Now, let's see all the components mentioned in process flow individually.</p>
+<p>Now, let us see all the components mentioned in the process flow individually.</p>
 <h4 id="ros-iot-bridge"><strong><em>ROS-IOT Bridge</em></strong></h4>
-<p>ROS-IOT Bridge plays a pivotal role and acts as a base for this task. As the name states, this will be acting like a medium between ROS and IOT communication. As like in process flow, we have attached a flow chart for easy understanding.</p>
+<p>ROS-IOT Bridge plays important and acts as a base for this task. As the name states this will be acting as a medium between ROS and IOT communication. As like in the process flow, we have attached a flow chart for easy understanding.</p>
 <p class="aligncenter"><img alt="alt text" src="images/flow_rosiot.png" /></p>
 <p>The explanation of this flow chart is given below.</p>
 <ol>
-<li>The orders from the client's are published in mqtt Topic which are subscribed in this node to access the data in ROS.</li>
+<li>The orders from the clients are published in MQTT Topic which should be subscribed in this node to access the data in ROS.</li>
 <p>​        Subscription Topic -  /eyrc/vb/unique_id/orders</p>
-<li>To use the incoming orders in other ROS nodes, we have used ROS publisher which will publish all the incoming orders from MQTT topic.</li>
+<li>To use the incoming orders in other ROS nodes, we have used ROS publisher which will publish all the incoming orders from the MQTT topic.</li>
 <p>​        Publication Topic -  /ros_iot_bridge/mqtt/sub </p>
 <li>
 <p>Apart from publishing to ROS topic, this node acts as an Action Server. So, that it can receive goals from multiple ROS Clients.</p>
 </li>
 <li>
-<p>On receiving any goal from the client, the node will be validating it using the arguments passed to it. The sheet name is the validater for the goals. We are using sheet name as validater because at the next step we are going to push all the data in goals to google sheets.</p>
+<p>On receiving any goal from the client, the node will be validating it using the arguments passed to it. The sheet name is the validator for the goals. We are using sheet name as validator because, at the next step, we are going to push all the data in goals to google sheets.</p>
 </li>
 <li>
-<p>If the goal is valid, then this bridge will push the data to various google sheets with respect to the sheet name in the goal asynschronously.</p>
+<p>If the goal is valid, then this bridge will push the data to various google sheets concerning the sheet name in the goal synchronously.</p>
 </li>
 </ol>
 <h4 id="ur5_1-arm-node"><strong><em>ur5_1 arm Node</em></strong></h4>
-<p>This node will control the ur5_1 arm present in the gazebo and rviz using moveit packages. There are two tasks that this arm needs to carry out, so we have two seperate classes in a single node to complete these tasks.</p>
-<p>The Class Camera will use the 2d camera as a sensor input and process the image to get color of all individual packages with their position as package names. To do this the camera needs to subscribe to the ROS topic.</p>
+<p>This node will control the ur5_1 arm present in the gazebo and rviz using moveit packages. There are two tasks that this arm needs to carry out, so we have two separate classes in a single node to complete these tasks.</p>
+<p>The Class Camera will use the 2d camera as a sensor input and process the image to get the color of all individual packages with their position as the package name. To do this the camera needs to subscribe to the ROS topic.</p>
 <p>Subscription Topic -  /eyrc/vb/camera_1/image_raw</p>
-<p>After subscribing to the ROS topic this will use the callback function to convert the raw_image data to image format. To get the package color there is a need of image processing unit which can make the image into suitable format to decode it. We have used QR Decoding method with the help of pyzbar to get better results.</p>
-<p>On completion of image processing, the image is decoded with the help of pyzbar. Though it is decoded and got the color of all the packages, we need to find it's position in the shelf. For enabling this, we have used some re-arranging methods with the help of the decoded data which can arrange the color of the packages in the proper sequence with the package name in it.</p>
-<p>Re-arranging Method - The re-arranging is done twice one with the x position of the decoded data and the y position of the decoded data. Finally the package name and color are stored in the list which can be used for further processing.</p>
-<p>The Class UR51Node will use the class camera to get the color and package name in the shelf. Before this, the constructor of this class will interface the ur5 arm present in the gazebo with the moveit planners. Then this node will send the extracted package color and package name to ROS-IOT server to push the data into the Inventory Spreadsheet of the google sheets asynchronously.</p>
-<p>This node needs to subscribe to the ROS Topic which contains all the data of the incoming order which are published by ROS-IOT Bridge.</p>
+<p>After subscribing to the ROS topic this will use the callback function to convert the raw_image data to image format. To get the package colour there is a need for an image processing unit which can make the image into a suitable format to decode it. We have used the QR Decoding method with the help of pyzbar to get better results.</p>
+<p>On completion of image processing, the image is decoded with the help of pyzbar. Though it is decoded and got the colour of all the packages, we need to find its position on the shelf. For enabling this, we have used some re-arranging methods with the help of the decoded data which can arrange the colour of the packages in the proper sequence with the package name in it.</p>
+<p>Re-arranging Method - The re-arranging is done twice one with the x position of the decoded data and the y position of the decoded data. Finally, the package name and colour are stored in the list which can be used for further processing.</p>
+<p>The Class UR51Node will use the class camera to get the colour and package name in the shelf. Before that, the constructor of this class will interface the ur5 arm present in the gazebo to the moveit planners. Then this node will send the extracted package colour and package name to the ROS-IOT server to push the data into the Inventory Spreadsheet of the google sheets synchronously.</p>
+<p>This node needs to subscribe to the ROS Topic which contains all the data of the incoming order which is published by ROS-IOT Bridge.</p>
 <p>Subscription Topic -   /ros_iot_bridge/mqtt/sub </p>
-<p>This node will continuously make a callback to get the incoming orders by using ROS Subscriber. Whenever data are traced by the mqtt_callback function it will convert the message received to suitable format to process and send to function algorithm.</p>
-<p>This function algorithm is the important segment in processing orders. This will decide the orders to be processed. The decision of this algorithm will depend on the priority of the orders. In this scenario, priority is of three types high, medium, low which in turn received as orders like medicines, food, clothes respectively.</p>
-<p>After prioritizing the packages, the arm needs to pick and place the packages from the shelf to the conveyor. This process is done with the help of the functions task and pick and place.</p>
-<p>Function task will receive the prioritized orders, but we need to check the availability of the product and get the product position in the shelf which can be further processed. To obtain this, we have used the lists extracted from the class Camera. In that list we have searched the prioritized order(in terms of color) and package color. Then the result of the search will be sent to the ur5_2 arm server and pick and place in one of the arguments.</p>
+<p>This node will continuously make a callback to get the incoming orders by using ROS Subscriber. Whenever data is traced by the mqtt_callback function it will convert the message received to a suitable format to process and sends to the function algorithm.</p>
+<p>This function algorithm is an important segment in processing orders. This will decide the orders to be processed. The decision of this algorithm will depend on the priority of the orders. In this scenario, priority is of three types high, medium, and low which in turn are received as orders like medicines, food, and clothes respectively.</p>
+<p>After prioritizing the packages, the arm needs to pick and place the packages from the shelf to the conveyor. This process is done with the help of the function’s task, pick and place.</p>
+<p>Function task will receive the prioritized orders, but we need to check the availability of the product and get the product positioned on the shelf which can be further processed. To obtain this, we have used the lists extracted from the class Camera. In that list, we have searched the prioritized order (in terms of colour) and package colour. Then the result of the search will be sent to the ur5_2 arm server to pick and place in one of the arguments.</p>
 <p>Function pick and place is used by the ur5_1 robotic manipulator to manipulate the packages from the shelf to the conveyor belt. To do this, it uses the saved trajectories present in the config folder of pkg_task5. We have also threaded this function so that this function will not wait for the data to be pushed to the IOT server.</p>
-<p>After dispatching each package to the conveyor the status of that package is also updated to the google sheets by using send goal iot function. There are certain other functions like store, push data, transition, play planned path which supports the above mentioned functions to complete their respective jobs.</p>
+<p>After dispatching each package to the conveyor, the status of that package is also updated on google sheets by using send goal IoT function. There are certain other functions like the store, push data, transition, and play planned path which support the above-mentioned functions to complete their respective jobs.</p>
 <h4 id="ur5_2-arm-node"><strong><em>ur5_2 arm Node</em></strong></h4>
-<p>This node will control the ur5_2 arm present in the gazebo and rviz using moveit packages. This arm needs to sort the packages from the conveyor belt to the shipment bins based on the color of the packages.</p>
-<p>This node will receive the goals from the server on goal function and validates it. Validation is done to process the goals that are relevant to this server else it will reject it. Once the goal is validated, the accepted goals are further processed using process goal function which in turn sends the processing to function sorting.</p>
-<p>Before knowing about the sorting function we will look at the supporting functions. To get the package closer to ur5_2 arm we need to control the conveyor belt. This is done with the help of the function control and this will power up the conveyor belt until the package reaches the specific point in the belt.</p>
-<p>To detect the packages we need to  subscribe ROS topic of logical camera 2. </p>
+<p>This node will control the ur5_2 arm present in the gazebo and rviz using moveit packages. This arm needs to sort the packages from the conveyor belt to the shipment bins based on the colour of the packages.</p>
+<p>This node will receive the goals from the server in on goal function and validates them. Validation is done to process the goals which are relevant to this server else it will reject it. Once the goal is validated, the accepted goals are further processed using the process goal function which in turn sends the processing to function sorting.</p>
+<p>Before knowing about the sorting function we will look at the supporting functions. To get the package closer to the ur5_2 arm we need to control the conveyor belt. This is done with the help of the function control and this will power up the conveyor belt until the package reaches the specific point in the belt.</p>
+<p>To detect the packages we need to subscribe ROS topic of logical camera 2. </p>
 <p>Subscription Topic - /eyrc/vb/logical_camera_2 </p>
-<p>The callback function of this subscriber will continuosly monitor the position of the packages when it is in the logical camera's frame. After detecting the package, we need to move our arm from it's current position to top of the package. This will also use the subscription of the logical camera 2 topic. After detecting the values for the translation the values are passed to end effector translation function which will compute cartesian way points to move the arm.</p>
-<p>Now, coming back to sorting function which will use all the above mentioned supporting functions to complete the manipulation. We have threaded this function to make the belt run parallelly while the package being sorted. The color of this package received from the client is used for sorting. We have included one more thread to push data asynchronously to ROS-IOT server.</p>
-<p>After shipping each package from the conveyor to the bins the status of that package is also updated to the google sheets by using send goal iot function to ROS-IOT server. Also, there are some other functions like hard on_goal, on_cancel, set joint angles which supports the above mentioned functions to complete their respective jobs.</p>
+<p>The callback function of this subscriber will continuously monitor the position of the packages when it is in the logical camera's frame. After detecting the package, we need to move our arm from its current position to the top of the package. This will also use the subscription of the logical camera 2 topics. After detecting the values for the translation the values are passed to the end effector translation function which will compute cartesian waypoints to move the arm.</p>
+<p>Now, coming back to the sorting function which will use all the above-mentioned supporting functions to complete the manipulation. We have threaded this function to make the belt run parallel while the package is being sorted. The colour of this package received from the client is used for sorting. We have included one more thread to push data synchronously to the ROS-IOT server.</p>
+<p>After shipping each package from the conveyor to the bins the status of that package is also updated the google sheets by using send goal IoT function to the ROS-IOT server. Also, there are some other functions like hard on_goal, on_cancel, and set joint angles which support the above-mentioned functions to complete their respective jobs.</p>
 <h4 id="google-sheets"><strong><em>Google Sheets</em></strong></h4>
-<p>There are multiple points in this theme to push data to spread sheet. The importance in pushing data to spreadsheet is to quickly check and validate the particular state of the goal because it will remain forever in the sheets. We have created a Inventory Management Sheet in google sheet which will contain five different sheets. The purpose of each sheet is mentioned below.</p>
+<p>There are multiple points in this theme to push data to a spreadsheet. The importance of pushing data to a spreadsheet is to quickly check and validate the particular state of the goal because it will remain forever in the sheets. We have created an Inventory Management Sheet in google Sheets which will contain five different sheets. The purpose of each sheet is mentioned below.</p>
 <p><strong><em>Inventory sheet</em></strong> - This sheet will contain all the details of the packages that are available in the shelf (or) Inventory.</p>
 <p><img alt="alt text" src="images/sheet1.png" /></p>
 <p><strong><em>IncomingOrders sheet</em></strong> - This sheet will contain all the details of the orders sent by the consumers.</p>
@@ -174,7 +174,7 @@
 <p><strong><em>OrdersShipped sheet</em></strong> - This sheet will contain all the details of the packages which are shipped by the ur5_2 arm along with the estimated time of delivery.</p>
 <p><img alt="alt text" src="images/sheet4.png" /></p>
 <h4 id="iot-dashboard"><strong><em>IOT Dashboard</em></strong></h4>
-<p>We have made a user-friendly dashboard where the live status of the packages present in the warehouse is displayed. The dashboard consists of containers in which the data like No. of Orders, No. of Dispatched Packages, No. of Shipped Packages and the Total Income incurred by the warehouse. </p>
+<p>We have made a user-friendly dashboard where the live status of the packages present in the warehouse is displayed. The dashboard consists of containers in which the data like No. of Orders, No. of Dispatched Packages, No. of Shipped Packages and the Total Income incurred by the warehouse.</p>
 <p><img alt="alt text" src="images/status.png" /></p>
 <p>Next a bar graph is depicted to represent the total time taken by a package till it is shipped after receiving the order. </p>
 <p class="aligncenter"><img alt="alt text" src="images/bargraph.png" /></p>
