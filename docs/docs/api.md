@@ -1,6 +1,6 @@
 ## *API Documentation*
 
-In this section, we will discuss about the API's that are used in this theme
+In this section, we will discuss the APIs that are used in this theme
 to complete the objectives mentioned.
 
 We have used following ROS packages
@@ -13,9 +13,11 @@ We have used following ROS packages
 
 #### pkg_ros_iot_bridge
 This is one of the main packages which is required to complete the objective.
-As this theme is concentrating on development of Automated Warehouse Management System and as we know that an autonomous system needs to do the job on it's own. So, It will receive orders only through IOT i.e., HiveMq and all the status are updated again to the internet medium. So, there is a need of an API which can act as a Bridge between IOT and ROS.
 
-As this package is a bridge between ROS and IOT, we need to know the working of this package. We have included the tree of the package , we will discuss all the files and their usage on this package.
+As this theme is concentrating on the development of an Automated Warehouse Management System and as we know that an autonomous system needs to do the job on its own. So, It will receive orders only through IOT i.e., HiveMq and all the statuses are updated again to the internet medium. So, an API that can act as a Bridge between IOT and ROS is needed.
+
+As this package is a bridge between ROS and IOT, we need to know the working of this package. We have included the tree of the package, we will discuss all the files and their usage on this package.
+
 
 
 ![alt text](images/tree_rosiot.png)
@@ -32,7 +34,7 @@ Important ros and mqtt topics are listed below
     sub_cb_ros_topic: "/ros_iot_bridge/mqtt/sub"
 ```
 
-Apart from the mqtt and ROS topics, this file also contains the google spreadsheet's webapp ID. This webapp Id can be used to push data to the google sheets.
+Apart from the mqtt and ROS topics, this file also contains the google spreadsheet's web app ID. This web app Id can be used to push data to google sheets.
 ```yaml
 google_apps:
     //spreadsheet id of our team
@@ -43,17 +45,17 @@ google_apps:
 
 **message and action files**
 
-These message and action files are used to send and receive data between both ROS nodes and Iot Servers.
+These message and action files are used to send and receive data between both ROS nodes and IoT Servers.
 
 
-The Usage of the message file is to store the data of the incoming orders and use the file to publish the same in required format.
+The Usage of the message file is to store the data of the incoming orders and use the file to publish the same in the required format.
 
 
     time timestamp  //stores the timestamp of the incoming orders
     string topic    //stores the topic in which the orders are received
     string message  //stores the incoming orders in string format
 
-The usage of action files will come into picture when other ROS nodes try to send data to this ROS-IOT action server. So, to receive goal, get feedback and result of the goal. There should be appropriate action files present in the package. The action file used in this package is displayed here.
+The usage of action files will come into the picture when other ROS nodes try to send data to this ROS-IOT action server. So, to receive the goal, get feedback and the result of the goal. There should be appropriate action files present in the package. The action file used in this package is displayed here.
 
 
 ```yaml
